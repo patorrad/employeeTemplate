@@ -10,6 +10,7 @@ const readFileAsync = util.promisify(fs.readFile);
 const writeFileAsync = util.promisify(fs.writeFile);
 
 let employeeArray = [];
+let cardsHTML = '';
 
 async function promptUser() {
     let { position } = await inquirer.prompt({
@@ -57,22 +58,35 @@ async function promptUser() {
     };
 };
 
-async function getHTML(employeeRole) {
-    console.log(employeeRole);
-    
-    //let { html } = await readFileAsync(`./templates/${employeeRole}.html`, 'utf8');
+async function getHTML(employees) {
+    for (element of employees) {
+        let html = await readFileAsync(`./templates/${element.getRole()}.html`, 'utf8');
+        html = html
+        .replace(/employeeName/, element.name)
+        .replace(/employeeTitle/, element.getRole())
+        .replace(/employeeId/, element.id)
+        .replace(/employeeEmail/, element.email);
+        switch (element.getRole())
+        {
+            case 'Engineer': html = html.replace(/github/, element.github); break;
+            case 'Inter':    html = html.replace(/school/, element.school); break;
+            case 'Manager':  html = html.replace(/officeNumber/, element.officeNumber); break;
+        }
+        console.log(html);
+    }    
     //return html;
 }
 
 function generateHTML(employees) {
     try {
         employees.forEach(element => {
-           console.log(getHTML(element.getRole));
+           let card = getHTML(element.getRole()).replace(/name/, element.name);
+           console.log(element);           
+           console.log(card);           
         });        
     } catch (err) {
         console.log(err);        
-    }
-    return ``
+    };
 }
 
 async function init() {
@@ -91,7 +105,18 @@ async function init() {
             console.log("Goodbye.");
         }        
     };
-    generateHTML(employeeArray);    
+    await getHTML(employeeArray);
+    // let test = getHTML(employeeArray[0].getRole());
+    // console.log(employeeArray[0].name);
+    
+    // let test1 = (await test).replace(/name/, employeeArray[0].name);
+    // console.log(test1);    
 };
+
+// function init() {
+//     let test = new Manager('name', 'id', 'email', 'officeNumber');
+//     console.log(test.getRole());
+    
+// };
 
 init();
