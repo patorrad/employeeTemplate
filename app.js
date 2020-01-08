@@ -18,7 +18,7 @@ async function promptUser() {
         name: "position"
     })
     let { name } = await inquirer.prompt({
-        message: "What is the manager's name?",
+        message: "What is the employee's name?",
         name: "name"
     })
     let { id } = await inquirer.prompt({
@@ -51,15 +51,18 @@ async function promptUser() {
                 message: "What is her/his school?",
                 name: "school"
             })
-            employeeArray.push(new Engineer(name, id, email, school));
+            employeeArray.push(new Intern(name, id, email, school));
             break;
         default:
+            console.log('Position provided does not exist. Try again.');
+            
             break;
     };
 };
 
 async function getHTML(employees) {
     for (element of employees) {
+        
         let html = await readFileAsync(`./templates/${element.getRole()}.html`, 'utf8');
         html = html
         .replace(/employeeName/, element.name)
@@ -72,21 +75,19 @@ async function getHTML(employees) {
             case 'Inter':    html = html.replace(/school/, element.school); break;
             case 'Manager':  html = html.replace(/officeNumber/, element.officeNumber); break;
         }
-        console.log(html);
+        cardsHTML += html;
+        //console.log(element);        
+        //console.log(html);
     }    
     //return html;
-}
-
-function generateHTML(employees) {
-    try {
-        employees.forEach(element => {
-           let card = getHTML(element.getRole()).replace(/name/, element.name);
-           console.log(element);           
-           console.log(card);           
-        });        
-    } catch (err) {
-        console.log(err);        
-    };
+    console.log(cardsHTML);
+    let index = await readFileAsync(`./templates/index.html`, 'utf8');
+    index = await index.replace(/jsHTML/, cardsHTML);
+    await writeFileAsync(
+        "index.html",
+        index,
+        "utf8"
+      );
 }
 
 async function init() {
